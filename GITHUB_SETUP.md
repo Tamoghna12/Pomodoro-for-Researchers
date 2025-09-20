@@ -12,7 +12,7 @@
 
 ```bash
 # Replace YOUR_USERNAME with your actual GitHub username
-git remote add origin https://github.com/YOUR_USERNAME/Pomodoro-for-Researchers.git
+git remote add origin https://github.com/tamoghna12/Pomodoro-for-Researchers.git
 
 # Push the code to GitHub
 git push -u origin main
@@ -28,7 +28,7 @@ git push -u origin main
 ## Step 4: Wait for Deployment
 - GitHub Actions will automatically build and deploy your app
 - Check the **Actions** tab to see deployment progress
-- Your app will be live at: `https://YOUR_USERNAME.github.io/Pomodoro-for-Researchers/`
+- Your app will be live at: `https://tamoghna12.github.io/Pomodoro-for-Researchers/`
 
 ## Step 5: Share with the World! 🌍
 Your Pomodoro timer for researchers is now live and ready for the community to use!
