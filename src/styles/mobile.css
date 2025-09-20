@@ -1,0 +1,177 @@
+/* Mobile-First Responsive Design System */
+
+/* Override for mobile modals */
+.mobile-modal-override {
+  position: fixed !important;
+  inset: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  height: 100vh !important;
+  width: 100vw !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+@media (min-width: 640px) {
+  .mobile-modal-override {
+    position: relative !important;
+    inset: auto !important;
+    margin: auto !important;
+    border-radius: 0.5rem !important;
+    height: auto !important;
+    width: auto !important;
+    max-width: 42rem !important;
+    max-height: 90vh !important;
+  }
+}
+
+/* Mobile-specific utilities */
+@media (max-width: 768px) {
+  /* Hide complex layouts on mobile */
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  /* Mobile-specific visibility */
+  .mobile-only {
+    display: block;
+  }
+
+  /* Container adjustments */
+  .mobile-container {
+    padding: 0.75rem;
+    margin: 0;
+  }
+
+  /* Card spacing for mobile */
+  .mobile-card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Mobile button adjustments */
+  .mobile-btn {
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    min-height: 2.75rem;
+  }
+
+  /* Mobile modal adjustments */
+  .mobile-modal {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    border-radius: 0;
+    height: 100vh;
+    width: 100vw;
+    max-width: none;
+    max-height: none;
+  }
+
+  /* Mobile chat adjustments */
+  .mobile-chat {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 60vh;
+    border-radius: 1rem 1rem 0 0;
+    max-width: none;
+  }
+
+  /* Mobile grid adjustments */
+  .mobile-grid-1 {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .mobile-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  /* Text sizing for mobile */
+  .mobile-text-base {
+    font-size: 0.875rem;
+  }
+
+  .mobile-text-lg {
+    font-size: 1rem;
+  }
+
+  /* Touch-friendly tap targets */
+  .mobile-tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .tablet-hidden {
+    display: none !important;
+  }
+
+  .tablet-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop-only elements */
+@media (min-width: 1025px) {
+  .mobile-only {
+    display: none;
+  }
+}
+
+/* Safe area adjustments for mobile browsers */
+@supports (padding: max(0px)) {
+  .mobile-safe-area {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Mobile viewport fixes */
+@media (max-width: 768px) {
+  /* Prevent horizontal scroll */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  /* Fix viewport units on mobile */
+  .mobile-vh {
+    height: 100vh;
+    height: 100dvh; /* Dynamic viewport height for modern browsers */
+  }
+
+  /* Improve touch scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Fix input zoom on iOS */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Better button spacing for touch */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Hide scrollbars but keep functionality */
+  .mobile-scrollbar-hide {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -93,42 +93,44 @@ const Controls: React.FC<ControlsProps> = ({ onSessionComplete }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Main Controls */}
-      <div className="flex justify-center space-x-4">
+      <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
         <button
           onClick={handleStartPause}
-          className="btn-primary flex items-center space-x-2 px-8 py-3 text-lg"
+          className="btn-primary flex items-center justify-center space-x-2 px-6 sm:px-8 py-3 text-base sm:text-lg mobile-tap-target"
           disabled={timer.status === 'completed'}
         >
           {getStartPauseIcon()}
           <span>{getStartPauseText()}</span>
         </button>
 
-        <button
-          onClick={handleReset}
-          className="btn-secondary flex items-center space-x-2 px-6 py-3"
-          disabled={timer.status === 'idle'}
-        >
-          <RotateCcw className="w-5 h-5" />
-          <span>Reset</span>
-        </button>
+        <div className="flex space-x-3 sm:space-x-4">
+          <button
+            onClick={handleReset}
+            className="btn-secondary flex items-center justify-center space-x-2 px-4 sm:px-6 py-3 flex-1 sm:flex-none mobile-tap-target"
+            disabled={timer.status === 'idle'}
+          >
+            <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Reset</span>
+          </button>
 
-        <button
-          onClick={handleSkip}
-          className="btn-secondary flex items-center space-x-2 px-6 py-3"
-          disabled={timer.status === 'idle'}
-        >
-          <SkipForward className="w-5 h-5" />
-          <span>Skip</span>
-        </button>
+          <button
+            onClick={handleSkip}
+            className="btn-secondary flex items-center justify-center space-x-2 px-4 sm:px-6 py-3 flex-1 sm:flex-none mobile-tap-target"
+            disabled={timer.status === 'idle'}
+          >
+            <SkipForward className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Skip</span>
+          </button>
+        </div>
       </div>
 
       {/* Mode Switcher */}
-      <div className="flex justify-center space-x-2">
+      <div className="flex justify-center space-x-1 sm:space-x-2">
         <button
           onClick={() => handleModeSwitch('work')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-3 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm mobile-tap-target ${
             timer.mode === 'work'
               ? 'bg-primary-600 text-white'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
@@ -139,37 +141,39 @@ const Controls: React.FC<ControlsProps> = ({ onSessionComplete }) => {
         </button>
         <button
           onClick={() => handleModeSwitch('shortBreak')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-2 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm mobile-tap-target ${
             timer.mode === 'shortBreak'
               ? 'bg-success-600 text-white'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
           }`}
           disabled={timer.status === 'running'}
         >
-          Short Break
+          <span className="hidden sm:inline">Short Break</span>
+          <span className="sm:hidden">Short</span>
         </button>
         <button
           onClick={() => handleModeSwitch('longBreak')}
-          className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+          className={`px-2 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm mobile-tap-target ${
             timer.mode === 'longBreak'
               ? 'bg-warning-600 text-white'
               : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
           }`}
           disabled={timer.status === 'running'}
         >
-          Long Break
+          <span className="hidden sm:inline">Long Break</span>
+          <span className="sm:hidden">Long</span>
         </button>
       </div>
 
       {/* Quick Actions */}
       {timer.status === 'completed' && (
         <div className="text-center">
-          <p className="text-green-600 dark:text-green-400 font-medium mb-3">
+          <p className="text-green-600 dark:text-green-400 font-medium mb-3 text-sm sm:text-base">
             🎉 Session completed! Great work!
           </p>
           <button
             onClick={() => handleModeSwitch('work')}
-            className="btn-primary"
+            className="btn-primary mobile-tap-target"
           >
             Start Next Session
           </button>

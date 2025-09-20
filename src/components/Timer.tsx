@@ -108,28 +108,28 @@ const Timer: React.FC = () => {
   }
 
   return (
-    <div className="text-center space-y-6">
+    <div className="text-center space-y-4 sm:space-y-6">
       {/* Mode Title */}
       <div>
-        <h2 className={`text-2xl font-bold ${getModeColor()}`}>
+        <h2 className={`text-xl sm:text-2xl font-bold ${getModeColor()}`}>
           {getModeTitle()}
         </h2>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
           {getStatusText()}
         </p>
       </div>
 
       {/* Timer Display */}
-      <div className={`timer-display ${getModeColor()} ${
+      <div className={`font-mono text-4xl sm:text-6xl md:text-8xl font-bold ${getModeColor()} ${
         timer.status === 'running' ? 'animate-pulse-slow' : ''
       }`}>
         {formatTime(timer.timeRemaining)}
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 sm:h-2">
         <div
-          className={`h-2 rounded-full transition-all duration-1000 ${
+          className={`h-1.5 sm:h-2 rounded-full transition-all duration-1000 ${
             timer.mode === 'work'
               ? 'bg-primary-600'
               : timer.mode === 'shortBreak'
@@ -143,15 +143,15 @@ const Timer: React.FC = () => {
       </div>
 
       {/* Session Info */}
-      <div className="flex justify-center space-x-8 text-sm text-gray-600 dark:text-gray-400">
+      <div className="flex justify-center space-x-4 sm:space-x-8 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
         <div className="text-center">
-          <div className="font-semibold text-lg text-gray-900 dark:text-white">
+          <div className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white">
             {timer.completedPomodoros}
           </div>
           <div>Completed Today</div>
         </div>
         <div className="text-center">
-          <div className="font-semibold text-lg text-gray-900 dark:text-white">
+          <div className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white">
             {timer.cycleCount}
           </div>
           <div>Current Cycle</div>

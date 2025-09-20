@@ -45,34 +45,34 @@ function App() {
 
   return (
     <div className={darkMode ? 'dark' : ''}>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300 mobile-scroll">
         <Header />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 mobile-safe-area">
           <div className="max-w-6xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:gap-8">
               {/* Main Timer Section */}
               <div className="lg:col-span-2">
-                <div className="card p-8 text-center mb-6">
+                <div className="card p-4 sm:p-8 text-center mb-4 sm:mb-6">
                   <Timer />
                   <Controls onSessionComplete={handleShowSessionSummary} />
                 </div>
 
                 {/* Research Session Selector */}
-                <div className="mb-6">
+                <div className="mb-4 sm:mb-6">
                   <button
                     onClick={() => setShowSessionSelector(true)}
-                    className="w-full p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 border border-blue-200 dark:border-blue-800 rounded-lg transition-all group"
+                    className="w-full p-4 sm:p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 border border-blue-200 dark:border-blue-800 rounded-lg transition-all group mobile-tap-target"
                   >
-                    <div className="flex items-center justify-center gap-3 text-blue-700 dark:text-blue-300 mb-2">
-                      <Calendar className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                      <span className="text-lg font-semibold">
+                    <div className="flex items-center justify-center gap-2 sm:gap-3 text-blue-700 dark:text-blue-300 mb-2">
+                      <Calendar className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+                      <span className="text-base sm:text-lg font-semibold">
                         {currentSessionType ?
                           `Continue: ${RESEARCH_SESSION_TYPES[currentSessionType].name}` :
                           'What are you working on today?'
                         }
                       </span>
                     </div>
-                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                    <p className="text-xs sm:text-sm text-blue-600 dark:text-blue-400">
                       {currentSessionType ?
                         RESEARCH_SESSION_TYPES[currentSessionType].description :
                         'Choose your research activity for optimized timing and AI assistance'
@@ -82,42 +82,42 @@ function App() {
                 </div>
 
                 {/* Quick Access Research Tools */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
                   <button
                     onClick={() => setShowQuickQuery(true)}
-                    className="p-4 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors group"
+                    className="p-3 sm:p-4 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors group mobile-tap-target"
                   >
                     <div className="flex items-center justify-center gap-2 text-blue-600 dark:text-blue-400">
-                      <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">Quick Query</span>
+                      <Search className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                      <span className="font-medium text-sm sm:text-base">Quick Query</span>
                     </div>
-                    <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
+                    <p className="text-xs text-blue-500 dark:text-blue-400 mt-1 hidden sm:block">
                       Instant answers
                     </p>
                   </button>
 
                   <button
                     onClick={() => setIsAssistantMinimized(false)}
-                    className="p-4 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg transition-colors group"
+                    className="p-3 sm:p-4 bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-lg transition-colors group mobile-tap-target"
                   >
                     <div className="flex items-center justify-center gap-2 text-purple-600 dark:text-purple-400">
-                      <Brain className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">AI Chat</span>
+                      <Brain className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                      <span className="font-medium text-sm sm:text-base">AI Chat</span>
                     </div>
-                    <p className="text-xs text-purple-500 dark:text-purple-400 mt-1">
+                    <p className="text-xs text-purple-500 dark:text-purple-400 mt-1 hidden sm:block">
                       Deep discussion
                     </p>
                   </button>
 
                   <button
                     onClick={() => setShowSessionSelector(true)}
-                    className="p-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg transition-colors group"
+                    className="p-3 sm:p-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg transition-colors group mobile-tap-target"
                   >
                     <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
-                      <Target className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">Sessions</span>
+                      <Target className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" />
+                      <span className="font-medium text-sm sm:text-base">Sessions</span>
                     </div>
-                    <p className="text-xs text-green-500 dark:text-green-400 mt-1">
+                    <p className="text-xs text-green-500 dark:text-green-400 mt-1 hidden sm:block">
                       Research tasks
                     </p>
                   </button>
@@ -125,9 +125,9 @@ function App() {
 
                 {/* Research Context */}
                 {ai.enabled && ai.researchContext.currentTopic && (
-                  <div className="card p-4 mb-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800">
-                    <h3 className="font-medium text-gray-900 dark:text-white mb-2">Current Research Topic</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300">{ai.researchContext.currentTopic}</p>
+                  <div className="card p-3 sm:p-4 mb-4 sm:mb-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-800">
+                    <h3 className="font-medium text-sm sm:text-base text-gray-900 dark:text-white mb-2">Current Research Topic</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">{ai.researchContext.currentTopic}</p>
                     {ai.researchContext.focusAreas.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {ai.researchContext.focusAreas.slice(0, 3).map((area, index) => (
@@ -145,7 +145,7 @@ function App() {
               </div>
 
               {/* Statistics and Insights Sidebar */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6">
                 <SessionStats />
                 <FocusInsights maxInsights={3} />
 
