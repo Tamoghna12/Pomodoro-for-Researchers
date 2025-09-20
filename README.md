@@ -2,12 +2,12 @@
 
 A specialized Pomodoro timer application designed for researchers with AI-powered insights and productivity analytics.
 
-[![Deploy to GitHub Pages](https://github.com/your-username/Pomodoro-for-Researchers/actions/workflows/deploy.yml/badge.svg)](https://github.com/your-username/Pomodoro-for-Researchers/actions/workflows/deploy.yml)
+[![Deploy to GitHub Pages](https://github.com/Tamoghna12/Pomodoro-for-Researchers/actions/workflows/deploy.yml/badge.svg)](https://github.com/Tamoghna12/Pomodoro-for-Researchers/actions/workflows/deploy.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🚀 Live Demo
 
-**[Try it now →](https://your-username.github.io/Pomodoro-for-Researchers/)**
+**[Try it now →](https://Tamoghna12.github.io/Pomodoro-for-Researchers/)**
 
 ## ✨ What Makes This Special
 
