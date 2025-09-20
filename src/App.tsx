@@ -9,9 +9,11 @@ import ResearchAssistant from './components/ResearchAssistant'
 import QuickQuery from './components/QuickQuery'
 import FocusInsights from './components/FocusInsights'
 import SessionSummary from './components/SessionSummary'
+import ResearchSessionSelector from './components/ResearchSessionSelector'
 import { useNotifications } from './hooks/useNotifications'
 import { useLocalStorage } from './hooks/useLocalStorage'
-import { Search, Brain } from 'lucide-react'
+import { Search, Brain, Calendar, BookOpen, Target } from 'lucide-react'
+import { ResearchSessionType, RESEARCH_SESSION_TYPES } from './types/research'
 
 function App() {
   const darkMode = useSelector((state: RootState) => state.settings.darkMode)
@@ -21,7 +23,9 @@ function App() {
   const [isAssistantMinimized, setIsAssistantMinimized] = useState(true)
   const [showQuickQuery, setShowQuickQuery] = useState(false)
   const [showSessionSummary, setShowSessionSummary] = useState(false)
+  const [showSessionSelector, setShowSessionSelector] = useState(false)
   const [sessionSummaryData, setSessionSummaryData] = useState<Record<string, any> | null>(null)
+  const [currentSessionType, setCurrentSessionType] = useState<ResearchSessionType | null>(null)
 
   // Initialize notifications and local storage
   useNotifications()
@@ -30,6 +34,13 @@ function App() {
   const handleShowSessionSummary = (sessionData: Record<string, any>) => {
     setSessionSummaryData(sessionData)
     setShowSessionSummary(true)
+  }
+
+  const handleSessionSelect = (sessionType: ResearchSessionType, customDuration?: number) => {
+    setCurrentSessionType(sessionType)
+    setShowSessionSelector(false)
+    // TODO: Start timer with session type and custom duration
+    // This would integrate with the timer logic
   }
 
   return (
@@ -46,8 +57,32 @@ function App() {
                   <Controls onSessionComplete={handleShowSessionSummary} />
                 </div>
 
+                {/* Research Session Selector */}
+                <div className="mb-6">
+                  <button
+                    onClick={() => setShowSessionSelector(true)}
+                    className="w-full p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 border border-blue-200 dark:border-blue-800 rounded-lg transition-all group"
+                  >
+                    <div className="flex items-center justify-center gap-3 text-blue-700 dark:text-blue-300 mb-2">
+                      <Calendar className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                      <span className="text-lg font-semibold">
+                        {currentSessionType ?
+                          `Continue: ${RESEARCH_SESSION_TYPES[currentSessionType].name}` :
+                          'What are you working on today?'
+                        }
+                      </span>
+                    </div>
+                    <p className="text-sm text-blue-600 dark:text-blue-400">
+                      {currentSessionType ?
+                        RESEARCH_SESSION_TYPES[currentSessionType].description :
+                        'Choose your research activity for optimized timing and AI assistance'
+                      }
+                    </p>
+                  </button>
+                </div>
+
                 {/* Quick Access Research Tools */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="grid grid-cols-3 gap-4 mb-6">
                   <button
                     onClick={() => setShowQuickQuery(true)}
                     className="p-4 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg transition-colors group"
@@ -57,7 +92,7 @@ function App() {
                       <span className="font-medium">Quick Query</span>
                     </div>
                     <p className="text-xs text-blue-500 dark:text-blue-400 mt-1">
-                      Get instant research answers
+                      Instant answers
                     </p>
                   </button>
 
@@ -67,10 +102,23 @@ function App() {
                   >
                     <div className="flex items-center justify-center gap-2 text-purple-600 dark:text-purple-400">
                       <Brain className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                      <span className="font-medium">AI Assistant</span>
+                      <span className="font-medium">AI Chat</span>
                     </div>
                     <p className="text-xs text-purple-500 dark:text-purple-400 mt-1">
-                      Chat with research AI
+                      Deep discussion
+                    </p>
+                  </button>
+
+                  <button
+                    onClick={() => setShowSessionSelector(true)}
+                    className="p-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg transition-colors group"
+                  >
+                    <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400">
+                      <Target className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                      <span className="font-medium">Sessions</span>
+                    </div>
+                    <p className="text-xs text-green-500 dark:text-green-400 mt-1">
+                      Research tasks
                     </p>
                   </button>
                 </div>
@@ -150,6 +198,13 @@ function App() {
           onClose={() => setShowSessionSummary(false)}
           sessionData={sessionSummaryData}
         />
+
+        {showSessionSelector && (
+          <ResearchSessionSelector
+            onSelectSession={handleSessionSelect}
+            onClose={() => setShowSessionSelector(false)}
+          />
+        )}
       </div>
     </div>
   )

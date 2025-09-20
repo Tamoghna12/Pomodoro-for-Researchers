@@ -4,6 +4,7 @@ import { RootState, AppDispatch } from '../store/store'
 import { updateSettings } from '../store/slices/aiSlice'
 import { AI_PROVIDER_CONFIGS } from '../services/aiService'
 import { AIProvider, AISettings as AISettingsType } from '../types/ai'
+import APIKeySetup from './APIKeySetup'
 import {
   Settings,
   Brain,
@@ -15,7 +16,8 @@ import {
   CheckCircle,
   AlertCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  ArrowLeft
 } from 'lucide-react'
 
 interface AISettingsProps {
@@ -39,6 +41,7 @@ const AISettings: React.FC<AISettingsProps> = ({ onClose }) => {
   const [showApiKey, setShowApiKey] = useState(false)
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [isTesting, setIsTesting] = useState(false)
+  const [showSetupGuide, setShowSetupGuide] = useState<AIProvider | null>(null)
 
   useEffect(() => {
     if (ai.settings) {
@@ -59,6 +62,11 @@ const AISettings: React.FC<AISettingsProps> = ({ onClose }) => {
       baseUrl: provider === 'ollama' ? 'http://localhost:11434' : ''
     }))
     setTestResult(null)
+  }
+
+  const handleSetupComplete = (apiKey: string) => {
+    setFormData(prev => ({ ...prev, apiKey, enabled: true }))
+    setShowSetupGuide(null)
   }
 
   const handleInputChange = (field: keyof AISettingsType, value: any) => {
@@ -116,6 +124,16 @@ const AISettings: React.FC<AISettingsProps> = ({ onClose }) => {
 
   const selectedConfig = formData.provider ? AI_PROVIDER_CONFIGS[formData.provider] : null
 
+  if (showSetupGuide) {
+    return (
+      <APIKeySetup
+        provider={showSetupGuide}
+        onComplete={handleSetupComplete}
+        onBack={() => setShowSetupGuide(null)}
+      />
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -162,37 +180,46 @@ const AISettings: React.FC<AISettingsProps> = ({ onClose }) => {
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {Object.entries(AI_PROVIDER_CONFIGS).map(([key, config]) => (
-                <button
-                  key={key}
-                  onClick={() => handleProviderChange(key as AIProvider)}
-                  className={`p-4 border-2 rounded-lg text-left transition-colors ${
-                    formData.provider === key
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-900 dark:text-white">
-                      {config.displayName}
-                    </h4>
-                    {config.requiresApiKey && <Key className="w-4 h-4 text-gray-400" />}
-                  </div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                    Default: {config.defaultModel}
-                  </p>
-                  <div className="flex items-center gap-3 text-xs text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Zap className="w-3 h-3" />
-                      {config.maxTokens} tokens
-                    </span>
-                    {config.pricing && (
+                <div key={key} className="relative">
+                  <button
+                    onClick={() => handleProviderChange(key as AIProvider)}
+                    className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${
+                      formData.provider === key
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-gray-900 dark:text-white">
+                        {config.displayName}
+                      </h4>
+                      {config.requiresApiKey && <Key className="w-4 h-4 text-gray-400" />}
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      Default: {config.defaultModel}
+                    </p>
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
                       <span className="flex items-center gap-1">
-                        <DollarSign className="w-3 h-3" />
-                        ${config.pricing.inputPer1k}/1k
+                        <Zap className="w-3 h-3" />
+                        {config.maxTokens} tokens
                       </span>
-                    )}
-                  </div>
-                </button>
+                      {config.pricing && (
+                        <span className="flex items-center gap-1">
+                          <DollarSign className="w-3 h-3" />
+                          ${config.pricing.inputPer1k}/1k
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                  {config.requiresApiKey && (
+                    <button
+                      onClick={() => setShowSetupGuide(key as AIProvider)}
+                      className="absolute top-2 right-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded"
+                    >
+                      Setup Guide
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           </div>

@@ -59,12 +59,17 @@ export const AI_PROVIDER_CONFIGS: Record<AIProvider, AIProviderConfig> = {
     name: 'groq',
     provider: 'groq',
     displayName: 'Groq',
-    defaultModel: 'llama3-8b-8192',
-    availableModels: ['llama3-8b-8192', 'llama3-70b-8192', 'mixtral-8x7b-32768'],
+    defaultModel: 'llama-3.1-8b-instant',
+    availableModels: [
+      'llama-3.1-8b-instant',
+      'llama-3.3-70b-versatile',
+      'groq-compound',
+      'openai/gpt-oss-120b'
+    ],
     requiresApiKey: true,
     supportsChat: true,
     supportsQuickQuery: true,
-    maxTokens: 8192,
+    maxTokens: 131072,
     pricing: { inputPer1k: 0.05, outputPer1k: 0.08 }
   },
   ollama: {
