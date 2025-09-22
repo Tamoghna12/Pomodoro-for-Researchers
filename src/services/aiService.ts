@@ -63,8 +63,14 @@ export const AI_PROVIDER_CONFIGS: Record<AIProvider, AIProviderConfig> = {
     availableModels: [
       'llama-3.1-8b-instant',
       'llama-3.3-70b-versatile',
-      'groq-compound',
-      'openai/gpt-oss-120b'
+      'meta-llama/llama-guard-4-12b',
+      'openai/gpt-oss-120b',
+      'openai/gpt-oss-20b',
+      'groq/compound',
+      'groq/compound-mini',
+      'meta-llama/llama-4-maverick-17b-128e-instruct',
+      'meta-llama/llama-4-scout-17b-16e-instruct',
+      'qwen/qwen3-32b'
     ],
     requiresApiKey: true,
     supportsChat: true,

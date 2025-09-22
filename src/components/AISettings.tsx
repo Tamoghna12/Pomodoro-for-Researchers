@@ -1,23 +1,21 @@
 import React, { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { RootState, AppDispatch } from '../store/store'
-import { updateSettings } from '../store/slices/aiSlice'
-import { AI_PROVIDER_CONFIGS } from '../services/aiService'
-import { AIProvider, AISettings as AISettingsType } from '../types/ai'
-import APIKeySetup from './APIKeySetup'
+import { aiService, AI_PROVIDER_CONFIGS } from '../services/aiService'
+import { AISettings as AISettingsType, AIProvider } from '../types/ai'
 import {
   Settings,
-  Brain,
   Key,
-  Server,
-  Zap,
-  DollarSign,
-  Info,
-  CheckCircle,
-  AlertCircle,
+  Brain,
+  Check,
+  X,
   Eye,
   EyeOff,
-  ArrowLeft
+  AlertCircle,
+  Zap,
+  Globe,
+  Search,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 
 interface AISettingsProps {
@@ -25,381 +23,383 @@ interface AISettingsProps {
 }
 
 const AISettings: React.FC<AISettingsProps> = ({ onClose }) => {
-  const dispatch = useDispatch<AppDispatch>()
-  const ai = useSelector((state: RootState) => state.ai)
-
-  const [formData, setFormData] = useState<Partial<AISettingsType>>({
-    provider: 'gemini',
-    apiKey: '',
-    baseUrl: '',
-    model: '',
-    enabled: false,
-    maxTokens: 2048,
-    temperature: 0.7
-  })
-
+  const [settings, setSettings] = useState<Partial<AISettingsType>>(
+    aiService.getSettings() || {
+      provider: 'gemini',
+      apiKey: '',
+      model: 'gemini-1.5-flash',
+      enabled: false,
+      maxTokens: 4096,
+      temperature: 0.7
+    }
+  )
   const [showApiKey, setShowApiKey] = useState(false)
-  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null)
-  const [isTesting, setIsTesting] = useState(false)
-  const [showSetupGuide, setShowSetupGuide] = useState<AIProvider | null>(null)
+  const [testingConnection, setTestingConnection] = useState(false)
+  const [connectionStatus, setConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState('')
+  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [braveApiKey, setBraveApiKey] = useState('')
 
   useEffect(() => {
-    if (ai.settings) {
-      setFormData({
-        ...ai.settings,
-        apiKey: ai.settings.apiKey || ''
-      })
+    // Load Brave API key from localStorage
+    const savedBraveKey = localStorage.getItem('brave-search-api-key')
+    if (savedBraveKey) {
+      setBraveApiKey(savedBraveKey)
     }
-  }, [ai.settings])
+  }, [])
 
   const handleProviderChange = (provider: AIProvider) => {
-    const config = AI_PROVIDER_CONFIGS[provider]
-    setFormData(prev => ({
+    const providerConfig = AI_PROVIDER_CONFIGS[provider]
+    setSettings(prev => ({
       ...prev,
       provider,
-      model: config.defaultModel,
-      maxTokens: config.maxTokens,
-      baseUrl: provider === 'ollama' ? 'http://localhost:11434' : ''
+      model: providerConfig.defaultModel,
+      maxTokens: providerConfig.maxTokens,
+      apiKey: prev.provider === provider ? prev.apiKey : ''
     }))
-    setTestResult(null)
+    setConnectionStatus('idle')
   }
 
-  const handleSetupComplete = (apiKey: string) => {
-    setFormData(prev => ({ ...prev, apiKey, enabled: true }))
-    setShowSetupGuide(null)
-  }
-
-  const handleInputChange = (field: keyof AISettingsType, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-    setTestResult(null)
-  }
-
-  const handleSave = () => {
-    dispatch(updateSettings(formData))
-    if (onClose) onClose()
-  }
-
-  const handleTest = async () => {
-    if (!formData.provider || !formData.model) {
-      setTestResult({ success: false, message: 'Please select a provider and model' })
+  const handleSaveSettings = () => {
+    if (!settings.apiKey && settings.provider !== 'ollama') {
+      setErrorMessage('API key is required for this provider')
       return
     }
-
-    const config = AI_PROVIDER_CONFIGS[formData.provider]
-    if (config.requiresApiKey && !formData.apiKey) {
-      setTestResult({ success: false, message: 'API key is required for this provider' })
-      return
-    }
-
-    setIsTesting(true)
-    setTestResult(null)
 
     try {
-      // Simulate API test - in a real implementation, you'd actually test the connection
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      aiService.updateSettings(settings as AISettingsType)
 
-      // For demo purposes, randomly succeed or fail
-      const success = Math.random() > 0.3
-
-      if (success) {
-        setTestResult({
-          success: true,
-          message: `Successfully connected to ${config.displayName}`
-        })
-      } else {
-        setTestResult({
-          success: false,
-          message: 'Connection failed. Please check your settings.'
-        })
+      // Save Brave Search API key
+      if (braveApiKey) {
+        localStorage.setItem('brave-search-api-key', braveApiKey)
       }
-    } catch (error) {
-      setTestResult({
-        success: false,
-        message: 'Connection test failed. Please check your settings.'
-      })
-    } finally {
-      setIsTesting(false)
+
+      setConnectionStatus('success')
+      setErrorMessage('')
+
+      // Auto close after successful save
+      setTimeout(() => {
+        onClose?.()
+      }, 1500)
+    } catch {
+      setConnectionStatus('error')
+      setErrorMessage('Failed to save settings')
     }
   }
 
-  const selectedConfig = formData.provider ? AI_PROVIDER_CONFIGS[formData.provider] : null
+  const handleTestConnection = async () => {
+    if (!settings.apiKey && settings.provider !== 'ollama') {
+      setErrorMessage('Please enter an API key first')
+      return
+    }
 
-  if (showSetupGuide) {
-    return (
-      <APIKeySetup
-        provider={showSetupGuide}
-        onComplete={handleSetupComplete}
-        onBack={() => setShowSetupGuide(null)}
-      />
-    )
+    setTestingConnection(true)
+    setErrorMessage('')
+
+    try {
+      // Temporarily apply settings for testing
+      const testSettings = { ...settings, enabled: true } as AISettingsType
+      aiService.updateSettings(testSettings)
+
+      // Test with a simple query
+      await aiService.quickQuery('Hello, this is a connection test.')
+
+      setConnectionStatus('success')
+      setSettings(prev => ({ ...prev, enabled: true }))
+    } catch (error: unknown) {
+      setConnectionStatus('error')
+      setErrorMessage(error instanceof Error ? error.message : 'Connection test failed')
+    } finally {
+      setTestingConnection(false)
+    }
   }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-          <Brain className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-        </div>
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">AI Configuration</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Configure your preferred AI provider for research assistance
-          </p>
-        </div>
-      </div>
+  const getProviderIcon = (provider: AIProvider) => {
+    switch (provider) {
+      case 'gemini': return '🤖'
+      case 'openai': return '🧠'
+      case 'claude': return '🎭'
+      case 'groq': return '⚡'
+      case 'ollama': return '🦙'
+      default: return '🤖'
+    }
+  }
 
-      {/* Enable/Disable Toggle */}
-      <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-750 rounded-lg">
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'success': return 'text-green-600 dark:text-green-400'
+      case 'error': return 'text-red-600 dark:text-red-400'
+      default: return 'text-gray-600 dark:text-gray-400'
+    }
+  }
+
+  const currentProvider = AI_PROVIDER_CONFIGS[settings.provider as AIProvider]
+
+  return (
+    <div className="glass-card p-6 rounded-lg">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Settings className="w-5 h-5 text-gray-500" />
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+            <Brain className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
           <div>
-            <h3 className="font-medium text-gray-900 dark:text-white">Enable AI Assistant</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Turn on AI-powered research features
+            <h3 className="font-semibold text-gray-900 dark:text-white">AI Configuration</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Configure AI providers and search integration
             </p>
           </div>
         </div>
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input
-            type="checkbox"
-            checked={formData.enabled || false}
-            onChange={(e) => handleInputChange('enabled', e.target.checked)}
-            className="sr-only peer"
-          />
-          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-        </label>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
-      {formData.enabled && (
-        <>
-          {/* Provider Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              AI Provider
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {Object.entries(AI_PROVIDER_CONFIGS).map(([key, config]) => (
-                <div key={key} className="relative">
-                  <button
-                    onClick={() => handleProviderChange(key as AIProvider)}
-                    className={`w-full p-4 border-2 rounded-lg text-left transition-colors ${
-                      formData.provider === key
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-gray-900 dark:text-white">
-                        {config.displayName}
-                      </h4>
-                      {config.requiresApiKey && <Key className="w-4 h-4 text-gray-400" />}
+      {/* Provider Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          AI Provider
+        </label>
+        <div className="grid grid-cols-1 gap-2">
+          {Object.entries(AI_PROVIDER_CONFIGS).map(([key, config]) => (
+            <button
+              key={key}
+              onClick={() => handleProviderChange(key as AIProvider)}
+              className={`p-3 rounded-lg border-2 transition-all text-left ${
+                settings.provider === key
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{getProviderIcon(key as AIProvider)}</span>
+                  <div>
+                    <div className="font-medium text-gray-900 dark:text-white">
+                      {config.displayName}
                     </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                      Default: {config.defaultModel}
-                    </p>
-                    <div className="flex items-center gap-3 text-xs text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <Zap className="w-3 h-3" />
-                        {config.maxTokens} tokens
-                      </span>
-                      {config.pricing && (
-                        <span className="flex items-center gap-1">
-                          <DollarSign className="w-3 h-3" />
-                          ${config.pricing.inputPer1k}/1k
-                        </span>
-                      )}
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      {config.defaultModel} • {config.requiresApiKey ? 'API Key Required' : 'Local'}
                     </div>
-                  </button>
-                  {config.requiresApiKey && (
-                    <button
-                      onClick={() => setShowSetupGuide(key as AIProvider)}
-                      className="absolute top-2 right-2 px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded"
-                    >
-                      Setup Guide
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {selectedConfig && (
-            <>
-              {/* API Key */}
-              {selectedConfig.requiresApiKey && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    API Key
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showApiKey ? 'text' : 'password'}
-                      value={formData.apiKey || ''}
-                      onChange={(e) => handleInputChange('apiKey', e.target.value)}
-                      placeholder={`Enter your ${selectedConfig.displayName} API key`}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                    >
-                      {showApiKey ? (
-                        <EyeOff className="w-4 h-4 text-gray-400" />
-                      ) : (
-                        <Eye className="w-4 h-4 text-gray-400" />
-                      )}
-                    </button>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Your API key is stored locally and never sent to our servers
-                  </p>
-                </div>
-              )}
-
-              {/* Base URL (for Ollama) */}
-              {formData.provider === 'ollama' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Ollama Server URL
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Server className="w-5 h-5 text-gray-400" />
-                    <input
-                      type="url"
-                      value={formData.baseUrl || ''}
-                      onChange={(e) => handleInputChange('baseUrl', e.target.value)}
-                      placeholder="http://localhost:11434"
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    />
                   </div>
                 </div>
-              )}
-
-              {/* Model Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Model
-                </label>
-                <select
-                  value={formData.model || ''}
-                  onChange={(e) => handleInputChange('model', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {selectedConfig.availableModels.map((model) => (
-                    <option key={model} value={model}>
-                      {model}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Advanced Settings */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Max Tokens
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.maxTokens || 2048}
-                    onChange={(e) => handleInputChange('maxTokens', parseInt(e.target.value))}
-                    min="100"
-                    max={selectedConfig.maxTokens}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Temperature
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.temperature || 0.7}
-                    onChange={(e) => handleInputChange('temperature', parseFloat(e.target.value))}
-                    min="0"
-                    max="2"
-                    step="0.1"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Test Connection */}
-              <div className="p-4 bg-gray-50 dark:bg-gray-750 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="font-medium text-gray-900 dark:text-white">Test Connection</h4>
-                  <button
-                    onClick={handleTest}
-                    disabled={isTesting}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-md text-sm flex items-center gap-2"
-                  >
-                    {isTesting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        Testing...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="w-4 h-4" />
-                        Test
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                {testResult && (
-                  <div className={`flex items-center gap-2 text-sm ${
-                    testResult.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                  }`}>
-                    {testResult.success ? (
-                      <CheckCircle className="w-4 h-4" />
-                    ) : (
-                      <AlertCircle className="w-4 h-4" />
-                    )}
-                    {testResult.message}
+                {config.pricing && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    ${config.pricing.inputPer1k}/1K tokens
                   </div>
                 )}
-
-                <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-200 dark:border-blue-800">
-                  <div className="flex items-start gap-2">
-                    <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5" />
-                    <div className="text-sm text-blue-700 dark:text-blue-300">
-                      <p className="font-medium mb-1">How to get API keys:</p>
-                      <ul className="space-y-1 text-xs">
-                        <li>• Gemini: Visit Google AI Studio</li>
-                        <li>• OpenAI: Visit platform.openai.com</li>
-                        <li>• Claude: Visit console.anthropic.com</li>
-                        <li>• Groq: Visit console.groq.com</li>
-                        <li>• Ollama: Install locally, no key needed</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
               </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* API Key Configuration */}
+      {currentProvider?.requiresApiKey && (
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            API Key
+          </label>
+          <div className="relative">
+            <input
+              type={showApiKey ? 'text' : 'password'}
+              value={settings.apiKey || ''}
+              onChange={(e) => setSettings(prev => ({ ...prev, apiKey: e.target.value }))}
+              placeholder="Enter your API key"
+              className="w-full px-3 py-2 pr-20 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+              <button
+                onClick={() => setShowApiKey(!showApiKey)}
+                className="p-1 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
+                title={showApiKey ? 'Hide API key' : 'Show API key'}
+              >
+                {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+              <Key className="w-4 h-4 text-gray-400" />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+            Your API key is stored locally and never sent to our servers
+          </p>
+        </div>
+      )}
+
+      {/* Brave Search API Key */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4" />
+            Brave Search API Key (Optional)
+          </div>
+        </label>
+        <div className="relative">
+          <input
+            type={showApiKey ? 'text' : 'password'}
+            value={braveApiKey}
+            onChange={(e) => setBraveApiKey(e.target.value)}
+            placeholder="Enter Brave Search API key for enhanced research"
+            className="w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+          <Globe className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        </div>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-xs text-gray-600 dark:text-gray-400">
+            Enables web search integration for research queries
+          </p>
+          <a
+            href="https://brave.com/search/api/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+          >
+            Get API Key <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+      </div>
+
+      {/* Model Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Model
+        </label>
+        <select
+          value={settings.model || currentProvider?.defaultModel}
+          onChange={(e) => setSettings(prev => ({ ...prev, model: e.target.value }))}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          {currentProvider?.availableModels.map((model) => (
+            <option key={model} value={model}>
+              {model}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Advanced Settings */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+        >
+          {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          Advanced Settings
+        </button>
+
+        {showAdvanced && (
+          <div className="mt-3 space-y-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Max Tokens: {settings.maxTokens}
+              </label>
+              <input
+                type="range"
+                min="512"
+                max={currentProvider?.maxTokens || 8192}
+                value={settings.maxTokens || 4096}
+                onChange={(e) => setSettings(prev => ({ ...prev, maxTokens: Number(e.target.value) }))}
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Temperature: {settings.temperature?.toFixed(1)}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.1"
+                value={settings.temperature || 0.7}
+                onChange={(e) => setSettings(prev => ({ ...prev, temperature: Number(e.target.value) }))}
+                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Error Message */}
+      {errorMessage && (
+        <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
+          <span className="text-sm text-red-700 dark:text-red-300">{errorMessage}</span>
+        </div>
+      )}
+
+      {/* Connection Status */}
+      {connectionStatus !== 'idle' && (
+        <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
+          connectionStatus === 'success'
+            ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+            : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+        }`}>
+          {connectionStatus === 'success' ? (
+            <Check className="w-4 h-4 text-green-600 dark:text-green-400" />
+          ) : (
+            <X className="w-4 h-4 text-red-600 dark:text-red-400" />
+          )}
+          <span className={`text-sm ${getStatusColor(connectionStatus)}`}>
+            {connectionStatus === 'success'
+              ? 'AI connection successful! Settings saved.'
+              : 'Connection failed. Please check your settings.'
+            }
+          </span>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <button
+          onClick={handleTestConnection}
+          disabled={testingConnection || (!settings.apiKey && currentProvider?.requiresApiKey)}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium disabled:cursor-not-allowed"
+        >
+          {testingConnection ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Testing...
+            </>
+          ) : (
+            <>
+              <Zap className="w-4 h-4" />
+              Test Connection
             </>
           )}
+        </button>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={handleSave}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium"
-            >
-              Save Settings
-            </button>
-            {onClose && (
-              <button
-                onClick={onClose}
-                className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
-              >
-                Cancel
-              </button>
-            )}
+        <button
+          onClick={handleSaveSettings}
+          disabled={!settings.apiKey && currentProvider?.requiresApiKey}
+          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white rounded-lg transition-colors font-medium disabled:cursor-not-allowed"
+        >
+          <Settings className="w-4 h-4" />
+          Save Settings
+        </button>
+      </div>
+
+      {/* Current Status */}
+      <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-gray-600 dark:text-gray-400">Current Status:</span>
+          <span className={`font-medium ${
+            aiService.isEnabled() ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'
+          }`}>
+            {aiService.isEnabled() ? '✅ AI Enabled' : '⚠️ AI Disabled'}
+          </span>
+        </div>
+        {aiService.isEnabled() && (
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Using {currentProvider?.displayName} with {settings.model}
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   )
 }

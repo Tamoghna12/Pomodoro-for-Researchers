@@ -22,11 +22,13 @@ Unlike traditional Pomodoro timers, this application is specifically designed fo
 
 ### 🤖 AI-Powered Research Assistant
 - **5 AI Providers** - Choose from Gemini, OpenAI, Claude, Groq, or local Ollama
+- **Enhanced Search** - Brave Search integration with AI-powered result summaries
 - **Quick Query** - Get instant research answers without breaking focus
 - **Research Chat** - Deep conversations about your research topics
 - **Focus Insights** - AI analyzes your productivity patterns and suggests improvements
 - **Session Analysis** - Comprehensive AI review of completed work sessions
 - **Context Awareness** - AI remembers your research topics and focus areas
+- **Follow-up Questions** - Smart suggestions for deeper research exploration
 
 ### 🔬 Research-Specific Features
 - **Literature Review Mode** - Optimized for reading and note-taking
@@ -59,6 +61,7 @@ npm run dev
 
 To unlock the full power of AI-assisted research:
 
+### AI Provider Setup
 1. **Choose an AI Provider** (pick one or try multiple):
    - **Google Gemini** - Fast and cost-effective ([Get API Key](https://makersuite.google.com/))
    - **OpenAI GPT** - Reliable and well-known ([Get API Key](https://platform.openai.com/))
@@ -66,11 +69,19 @@ To unlock the full power of AI-assisted research:
    - **Groq** - Ultra-fast responses ([Get API Key](https://console.groq.com/))
    - **Ollama** - Complete privacy, run locally ([Install Ollama](https://ollama.ai/))
 
-2. **Configure in App**:
-   - Click the "AI Assistant" button (brain icon)
-   - Go to "Settings" tab
+2. **Configure AI Provider**:
+   - Click "AI Research Assistant" in the sidebar
+   - Go to "Settings" or click the gear icon
    - Enable AI and enter your API key
    - Test connection and start researching!
+
+### Enhanced Search Setup (Optional)
+For web search with AI summaries:
+1. **Get Brave Search API Key** ([Sign up here](https://brave.com/search/api/))
+2. **Configure in Settings**:
+   - Enter your Brave Search API key in AI settings
+   - Access "Enhanced Search" from the sidebar
+   - Enjoy AI-powered search results and summaries!
 
 ## 📚 How to Use
 
@@ -82,15 +93,17 @@ To unlock the full power of AI-assisted research:
 
 ### With AI Assistant
 1. **Quick Questions**: Click "Quick Query" for instant research answers
-2. **Deep Discussions**: Use the chat for complex research conversations
-3. **Productivity Insights**: Review AI suggestions after each session
-4. **Session Analysis**: Get comprehensive analysis of your work patterns
+2. **Enhanced Search**: Use the search feature for web research with AI summaries
+3. **Deep Discussions**: Use the chat for complex research conversations
+4. **Follow-up Questions**: Get smart suggestions for deeper exploration
+5. **Productivity Insights**: Review AI suggestions after each session
+6. **Session Analysis**: Get comprehensive analysis of your work patterns
 
 ### Research Workflow
 ```
-📖 Literature Review → 🤖 AI Query → ✍️ Writing Session → 📊 Data Analysis
-     ↓                    ↓              ↓                ↓
-  Note-taking         Quick answers    Focus writing    Method help
+📖 Literature Review → 🔍 Enhanced Search → 🤖 AI Query → ✍️ Writing Session → 📊 Data Analysis
+     ↓                      ↓                 ↓              ↓                ↓
+  Note-taking         Web research       Quick answers    Focus writing    Method help
 ```
 
 ## 🔒 Privacy & Security

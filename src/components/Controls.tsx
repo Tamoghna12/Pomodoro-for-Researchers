@@ -11,11 +11,11 @@ import {
   switchMode,
 } from '../store/slices/timerSlice'
 import { startSession } from '../store/slices/statsSlice'
-import { SessionData, TimerMode } from '../types/timer'
+import { SessionData, TimerMode, TimerSettings } from '../types/timer'
 import { generateId } from '../utils/helpers'
 
 interface ControlsProps {
-  onSessionComplete?: (sessionData: Record<string, any>) => void
+  onSessionComplete?: (sessionData: SessionData) => void
 }
 
 const Controls: React.FC<ControlsProps> = ({ onSessionComplete }) => {
@@ -183,7 +183,7 @@ const Controls: React.FC<ControlsProps> = ({ onSessionComplete }) => {
   )
 }
 
-function getDurationForMode(mode: TimerMode, settings: Record<string, any>): number {
+function getDurationForMode(mode: TimerMode, settings: TimerSettings): number {
   switch (mode) {
     case 'work':
       return settings.workDuration
