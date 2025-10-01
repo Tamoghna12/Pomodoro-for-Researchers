@@ -7,7 +7,7 @@ A specialized Pomodoro timer application designed for researchers with AI-powere
 
 ## 🚀 Live Demo
 
-**[Try it now →](https://Tamoghna12.github.io/Pomodoro-for-Researchers/)**
+**[Try it now →](https://tamoghna12.github.io/Pomodoro-for-Researchers/)**
 
 ## ✨ What Makes This Special
 
